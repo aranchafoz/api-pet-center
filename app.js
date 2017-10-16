@@ -17,6 +17,14 @@ let centers = new Map();
 // let itAnimal = 0
 // let animals = new Map();
 
+
+app.set('port', (process.env.PORT || 3000));
+
+app.get('/', function(req, resp) {
+  resp.status(200)
+  resp.end()
+})
+
 // ****** USERS *********
 
 app.get('/api/users', function(req, resp) {
@@ -294,7 +302,7 @@ app.delete('/api/center/:idCenter/animal/:idAnimal', function(req, resp) {
   }
 })
 
-app.listen(3000, function () {
+app.listen(app.get('port'), function () {
     console.log("Servidor arrancado");
 });
 
