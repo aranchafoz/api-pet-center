@@ -17,6 +17,8 @@ var knex = require('knex')({
 });
 // Para Heroku
 app.set('port', (process.env.PORT || 3000));
+// Heroku link:
+// (p.e.) https://limitless-retreat-78745.herokuapp.com/api/centers
 
 // ********************
 // **** Endpoints *****
@@ -129,7 +131,20 @@ app.get('/api/users/:id', function(req, resp) {
         resp.send("Unauthorized")
       } else {
         resp.status(200)
-        resp.send(user)
+        resp.send({
+          "id": userId,
+          "_links": {
+            "self": {
+               "href": 'http://localhost:3000/api/users/' + userId
+            },
+            "users": {
+              "href": 'http://localhost:3000/api/users'
+            },
+            "centers": {
+              "href": 'http://localhost:3000/api/centers'
+            }
+          }
+        })
       }
       // **** END ****
       resp.end()
@@ -177,7 +192,21 @@ app.put('/api/users/:idUser/adopta/:idAnimal', function(req, resp) {
               user_id: userId
             }).then( function(data) {
               resp.status(200)
-              resp.send({data: data})
+              resp.send({
+                "idAnimal": animalId,
+                "idUser": userId,
+                "_links": {
+                  "self": {
+                     "href": 'http://localhost:3000/api/users/' + userId
+                  },
+                  "users": {
+                    "href": 'http://localhost:3000/api/users'
+                  },
+                  "centers": {
+                    "href": 'http://localhost:3000/api/centers'
+                  }
+                }
+              })
               resp.end()
             })
           } else {
@@ -231,7 +260,20 @@ app.get('/api/centers/:id', function(req, resp) {
   .then( function(data) {
     if(data.length > 0) {
       resp.status(200)
-      resp.send(data)
+      resp.send({
+        "id": centerId,
+        "_links": {
+          "self": {
+             "href": 'http://localhost:3000/api/centers/' + centerId
+          },
+          "centers": {
+            "href": 'http://localhost:3000/api/centers'
+          },
+          "animals": {
+            "href": 'http://localhost:3000/api/centers/' + centerId + '/animals'
+          }
+        }
+      })
       resp.end()
     } else {
       resp.status(404)
@@ -280,7 +322,20 @@ app.post('/api/users/:idUser/centers', function(req, resp) {
           .then(function (row) {
             resp.status(201)
             resp.header('Location', 'http://localhost:3000/api/centers' + row)
-            resp.send(nuevoObj)
+            resp.send({
+              "id": row,
+              "_links": {
+                "self": {
+                   "href": 'http://localhost:3000/api/centers/' + row
+                },
+                "centers": {
+                  "href": 'http://localhost:3000/api/centers'
+                },
+                "animals": {
+                  "href": 'http://localhost:3000/api/centers/' + row + '/animals'
+                }
+              }
+            })
             resp.end()
           })
           .catch(function(error) {
@@ -345,7 +400,20 @@ app.put('/api/users/:idUser/centers/:idCenter', function(req, resp) {
                 .update(nuevoObj).then( function(data) {
                   resp.status(200)
                   resp.header('Location', 'http://localhost:3000/api/centers/' + data )
-                  resp.send({data: data})
+                  resp.send({
+                    "id": data,
+                    "_links": {
+                      "self": {
+                         "href": 'http://localhost:3000/api/centers/' + data
+                      },
+                      "centers": {
+                        "href": 'http://localhost:3000/api/centers'
+                      },
+                      "animals": {
+                        "href": 'http://localhost:3000/api/centers/' + data + '/animals'
+                      }
+                    }
+                  })
                   resp.end()
                 })
               } else {
@@ -485,8 +553,22 @@ app.get('/api/centers/:idCenter/animals/:idAnimal', function(req, resp) {
       .then( function(data) {
         if(data.length > 0) {
           resp.status(201)
-          resp.header('Location', 'http://localhost:3000/api/centers/' + centerId + '/animals/' + data)
-          resp.send(data)
+          resp.header('Location', 'http://localhost:3000/api/centers/' + centerId + '/animals/' + data[0].id)
+          resp.send({
+            "id": data[0].id,
+            "center_id": centerId,
+            "_links": {
+              "self": {
+                 "href": 'http://localhost:3000/api/centers/' + centerId + '/animals/' + data[0].id
+              },
+              "centers": {
+                "href": 'http://localhost:3000/api/centers'
+              },
+              "animals": {
+                "href": 'http://localhost:3000/api/centers/' + centerId + '/animals'
+              }
+            }
+          })
           resp.end()
         } else {
           resp.status(404)
@@ -557,7 +639,21 @@ app.post('/api/users/:idUser/centers/:idCenter/animals', function(req, resp) {
                 .then(function (row) {
                   resp.status(201)
                   resp.header('Location', 'http://localhost:3000/api/centers/' + centerId + '/animals/' + row)
-                  resp.send(nuevoObj)
+                  resp.send({
+                    "id": row,
+                    "center_id": centerId,
+                    "_links": {
+                      "self": {
+                         "href": 'http://localhost:3000/api/centers/' + centerId + '/animals/' + row
+                      },
+                      "centers": {
+                        "href": 'http://localhost:3000/api/centers'
+                      },
+                      "animals": {
+                        "href": 'http://localhost:3000/api/centers/' + centerId + '/animals'
+                      }
+                    }
+                  })
                   resp.end()
                 })
                 .catch(function(error) {
