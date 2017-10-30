@@ -20,6 +20,26 @@ app.set('port', (process.env.PORT || 3000));
 // Heroku link:
 // (p.e.) https://limitless-retreat-78745.herokuapp.com/api/centers
 
+// Base de datos
+var sqlite3 = require('sqlite3').verbose()
+var db = new sqlite3.Database('database.db')
+
+function initDatabase() {
+  db.serialize(function() {
+    db.run('CREATE TABLE IF NOT EXISTS user(id  INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, password TEXT NOT NULL, payload TEXT NOT NULL);')
+    db.run('CREATE TABLE IF NOT EXISTS center(id  INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,city TEXT NOT NULL,cp INTEGER NOT NULL,phone INTEGER NOT NULL,max_capacity  INTEGER NOT NULL,user_id INTEGER,FOREIGN KEY(user_id) REFERENCES User(id) ON DELETE CASCADE);')
+    db.run('CREATE TABLE IF NOT EXISTS animal(id  INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,type TEXT NOT NULL,age INTEGER NOT NULL,center_id INTEGER,user_id INTEGER,FOREIGN KEY(center_id) REFERENCES Center(id) ON DELETE CASCADE,FOREIGN KEY(user_id) REFERENCES User(id) ON DELETE CASCADE);')
+  })
+
+/*  db.run('DELETE FROM user WHERE id > 0')
+  db.run(`DELETE FROM sqlite_sequence WHERE name = 'user'`);
+  db.run('DELETE FROM center WHERE id > 0')
+  db.run(`DELETE FROM sqlite_sequence WHERE name = 'center'`);
+  db.run('DELETE FROM animal WHERE id > 0')
+  db.run(`DELETE FROM sqlite_sequence WHERE name = 'animal'`);*/
+}
+
+
 // ********************
 // **** Endpoints *****
 // ********************
@@ -506,16 +526,41 @@ app.delete('/api/users/:idUser/centers/:idCenter', function(req, resp) {
 app.get('/api/centers/:id/animals', function(req, resp) {
 
   const centerId = parseInt(req.params.id)
+  let offset = parseInt(req.query.offset);
 
   knex.select().table('center').where('id', centerId)
   .then( function(center) {
     if(center.length > 0) {
       knex.select().table('animal').where('center_id', centerId)
+      .limit(3).offset((offset - 1) * 3)
       .then( function(data) {
         var array = []
 
         data.forEach(function(element) {
-          array.push(element)
+          array.push({
+            item: {
+              id: element.id,
+              name: element.name,
+              type: element.type,
+              age: element.age,
+              center_id: element.center_id,
+              user_id: element.user_id
+            },
+            _links: {
+              self: {
+                 href: 'http://localhost:3000/api/centers/' + centerId + '/animals/' + data[0].id
+              },
+              prev: {
+                 href: 'http://localhost:3000/api/centers/' + centerId + '/animals?offset=' + (offset - 1)
+              },
+              next: {
+                 href: 'http://localhost:3000/api/centers/' + centerId + '/animals?offset=' + (offset + 1)
+              },
+              center: {
+                href: 'http://localhost:3000/api/centers' + centerId
+              }
+            }
+          })
         })
 
         if(array.length !== 0){
@@ -762,6 +807,8 @@ app.delete('/api/users/:idUser/centers/:idCenter/animals/:idAnimal', function(re
     resp.end()
   });
 })
+
+initDatabase();
 
 app.listen(app.get('port'), function () {
     console.log("Servidor arrancado");
