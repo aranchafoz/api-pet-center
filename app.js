@@ -71,7 +71,7 @@ app.post('/login', function(req, resp) {
         var token = jwt.encode(data[0].payload, secret)
 
         resp.status(201)
-        resp.send(token)
+        resp.send({token: token})
         resp.end()
       } else {
         resp.status(404)
