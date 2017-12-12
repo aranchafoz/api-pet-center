@@ -109,7 +109,7 @@ app.post('/register', function(req, resp) {
     .then(function (row) {
       resp.status(201)
       resp.header('Location', 'http://localhost:3000/api/users' + row)
-      resp.send(nuevoObj)
+      resp.send({token: token})
       resp.end()
     })
     .catch(function(error) {
