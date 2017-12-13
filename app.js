@@ -160,6 +160,7 @@ app.get('/api/users/:id', function(req, resp) {
         resp.status(200)
         resp.send({
           "id": userId,
+          "name": user.name,
           "_links": {
             "self": {
                "href": 'http://localhost:3000/api/users/' + userId
@@ -286,9 +287,16 @@ app.get('/api/centers/:id', function(req, resp) {
   knex.select().table('center').where('id', centerId)
   .then( function(data) {
     if(data.length > 0) {
+      let center = data[0]
       resp.status(200)
       resp.send({
         "id": centerId,
+        "name": center.name,
+        "city": center.city,
+        "cp": center.cp,
+        "phone": center.phone,
+        "max_capacity": center.max_capacity,
+        "user_id": center.user_id,
         "_links": {
           "self": {
              "href": 'http://localhost:3000/api/centers/' + centerId
@@ -604,11 +612,16 @@ app.get('/api/centers/:idCenter/animals/:idAnimal', function(req, resp) {
       knex.select().table('animal').where('id', animalId)
       .then( function(data) {
         if(data.length > 0) {
+          let animal = data[0]
           resp.status(201)
           resp.header('Location', 'http://localhost:3000/api/centers/' + centerId + '/animals/' + data[0].id)
           resp.send({
             "id": data[0].id,
+            "name": animal.name,
+            "type": animal.type,
+            "age": animal.age,
             "center_id": centerId,
+            "user_id": animal.user_id,
             "_links": {
               "self": {
                  "href": 'http://localhost:3000/api/centers/' + centerId + '/animals/' + data[0].id
