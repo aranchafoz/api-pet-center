@@ -323,6 +323,64 @@ app.get('/api/centers/:id', function(req, resp) {
   });
 })
 
+app.get('/api/users/:idUser/centers', function(req, resp) {
+
+  const userId = parseInt(req.params.idUser)
+  knex.select().table('user').where('id', userId)
+  .then( function(data) {
+    if(data.length > 0) {
+      let user = data[0]
+      // **** AUTHORITHATION ****
+      const tokenSent = req.headers['authorization'];
+      let payload = user.payload
+      let token = jwt.encode(payload, secret)
+      if( token !== tokenSent ) {
+        resp.status(401)
+        resp.send("Unauthorized")
+        resp.end()
+      }
+      // **** END ****
+      else {
+        knex.select().table('center').where('user_id', userId)
+        .then( function(data) {
+          var array = []
+
+          data.forEach(function(element) {
+            array.push({
+              id: element.id,
+              name: element.name,
+              city: element.city,
+              cp: element.cp,
+              phone: element.phone,
+              max_capacity: element.max_capacity,
+              user_id: element.user_id
+            })
+          })
+
+          if(array.length !== 0){
+            resp.status(200)
+            resp.send(array)
+            resp.end()
+          } else {
+            resp.status(404)
+            resp.send({error: "No se han registrado centros de este usuario"})
+            resp.end()
+          }
+        });
+      }
+    } else {
+      resp.status(404)
+      resp.send({error: "No existe ese usuario madafaka", id: userId})
+      resp.end()
+    }
+  })
+  .catch(function(error) {
+    resp.status(404)
+    resp.send({error: "No existe ese usuario pitu", id: userId})
+    resp.end()
+  });
+})
+
 app.post('/api/users/:idUser/centers', function(req, resp) {
 
   const userId = parseInt(req.params.idUser)
@@ -537,6 +595,63 @@ app.delete('/api/users/:idUser/centers/:idCenter', function(req, resp) {
 })
 
 // ****** ANIMALS *********
+app.get('/api/users/:id/animals', function(req, resp) {
+
+  const userId = parseInt(req.params.id)
+  let offset = parseInt(req.query.offset);
+
+  knex.select().table('user').where('id', userId)
+  .then( function(user) {
+    if(user.length > 0) {
+      knex.select().table('animal').where('user_id', userId)
+      .limit(3).offset((offset - 1) * 3)
+      .then( function(data) {
+        var array = []
+
+        data.forEach(function(element) {
+          array.push({
+            id: element.id,
+            name: element.name,
+            type: element.type,
+            age: element.age,
+            center_id: element.center_id,
+            user_id: element.user_id,
+            _links: {
+              prev: {
+                 href: 'http://localhost:3000/api/users/' + userId + '/animals?offset=' + (offset - 1)
+              },
+              next: {
+                 href: 'http://localhost:3000/api/users/' + userId + '/animals?offset=' + (offset + 1)
+              },
+              user: {
+                href: 'http://localhost:3000/api/users/' + userId
+              }
+            }
+          })
+        })
+
+        if(array.length !== 0){
+          resp.status(200)
+          resp.send(array)
+          resp.end()
+        } else {
+          resp.status(404)
+          resp.send({error: "No se han registrado animales de este usuario"})
+          resp.end()
+        }
+      });
+    } else {
+      resp.status(404)
+      resp.send({error: "No existe ese usuario", id: userId})
+      resp.end()
+    }
+  })
+  .catch(function(error) {
+    resp.status(404)
+    resp.send({error: "No existe ese usuario", id: userId})
+    resp.end()
+  });
+})
 
 app.get('/api/centers/:id/animals', function(req, resp) {
 
