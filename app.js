@@ -71,7 +71,7 @@ app.post('/login', function(req, resp) {
         var token = jwt.encode(data[0].payload, secret)
 
         resp.status(201)
-        resp.send({token: token})
+        resp.send({id: data[0].id, token: token})
         resp.end()
       } else {
         resp.status(404)
@@ -109,7 +109,7 @@ app.post('/register', function(req, resp) {
     .then(function (row) {
       resp.status(201)
       resp.header('Location', 'http://localhost:3000/api/users' + row)
-      resp.send({token: token})
+      resp.send({id: row[0], token: token})
       resp.end()
     })
     .catch(function(error) {
@@ -150,7 +150,7 @@ app.get('/api/users/:id', function(req, resp) {
     if(data.length > 0) {
       let user = data[0]
       // **** AUTHORITHATION ****
-      const tokenSent = req.headers['token'];
+      const tokenSent = req.headers['authorization'];
       let payload = user.payload
       let token = jwt.encode(payload, secret)
       if( token !== tokenSent ) {
@@ -199,7 +199,7 @@ app.put('/api/users/:idUser/adopta/:idAnimal', function(req, resp) {
     if(data.length > 0) {
       let user = data[0]
       // **** AUTHORITHATION ****
-      const tokenSent = req.headers['token'];
+      const tokenSent = req.headers['authorization'];
       let payload = user.payload
       let token = jwt.encode(payload, secret)
       if( token !== tokenSent ) {
@@ -331,7 +331,7 @@ app.post('/api/users/:idUser/centers', function(req, resp) {
     if(data.length > 0) {
       let user = data[0]
       // **** AUTHORITHATION ****
-      const tokenSent = req.headers['token'];
+      const tokenSent = req.headers['authorization'];
       let payload = user.payload
       let token = jwt.encode(payload, secret)
       if( token !== tokenSent ) {
@@ -408,7 +408,7 @@ app.put('/api/users/:idUser/centers/:idCenter', function(req, resp) {
     if(data.length > 0) {
       let user = data[0]
       // **** AUTHORITHATION ****
-      const tokenSent = req.headers['token'];
+      const tokenSent = req.headers['authorization'];
       let payload = user.payload
       let token = jwt.encode(payload, secret)
       if( token !== tokenSent ) {
@@ -491,7 +491,7 @@ app.delete('/api/users/:idUser/centers/:idCenter', function(req, resp) {
     if(data.length > 0) {
       let user = data[0]
       // **** AUTHORITHATION ****
-      const tokenSent = req.headers['token'];
+      const tokenSent = req.headers['authorization'];
       let payload = user.payload
       let token = jwt.encode(payload, secret)
       if( token !== tokenSent ) {
@@ -669,7 +669,7 @@ app.post('/api/users/:idUser/centers/:idCenter/animals', function(req, resp) {
     if(data.length > 0) {
       let user = data[0]
       // **** AUTHORITHATION ****
-      const tokenSent = req.headers['token'];
+      const tokenSent = req.headers['authorization'];
       let payload = user.payload
       let token = jwt.encode(payload, secret)
       if( token !== tokenSent ) {
@@ -770,7 +770,7 @@ app.delete('/api/users/:idUser/centers/:idCenter/animals/:idAnimal', function(re
     if(data.length > 0) {
       let user = data[0]
       // **** AUTHORITHATION ****
-      const tokenSent = req.headers['token'];
+      const tokenSent = req.headers['authorization'];
       let payload = user.payload
       let token = jwt.encode(payload, secret)
       if( token !== tokenSent ) {
