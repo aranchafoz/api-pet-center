@@ -668,14 +668,12 @@ app.get('/api/centers/:id/animals', function(req, resp) {
 
         data.forEach(function(element) {
           array.push({
-            item: {
-              id: element.id,
-              name: element.name,
-              type: element.type,
-              age: element.age,
-              center_id: element.center_id,
-              user_id: element.user_id
-            },
+            id: element.id,
+            name: element.name,
+            type: element.type,
+            age: element.age,
+            center_id: element.center_id,
+            user_id: element.user_id,
             _links: {
               self: {
                  href: 'http://localhost:3000/api/centers/' + centerId + '/animals/' + data[0].id
