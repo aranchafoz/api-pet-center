@@ -213,19 +213,20 @@ app.put('/api/users/:idUser/adopta/:idAnimal', function(req, resp) {
         .then( function(data) {
           if(data.length > 0) {
             let animal = data[0]
+
             knex('animal')
-            .where('id', '=', animalId)
+            .where('id', '=', animal.id)
             .update({
               center_id: null,
-              user_id: userId
+              user_id: user.id
             }).then( function(data) {
               resp.status(200)
               resp.send({
-                "idAnimal": animalId,
-                "idUser": userId,
+                "idAnimal": animal.id,
+                "idUser": user.id,
                 "_links": {
                   "self": {
-                     "href": 'http://localhost:3000/api/users/' + userId
+                     "href": 'http://localhost:3000/api/users/' + user.id
                   },
                   "users": {
                     "href": 'http://localhost:3000/api/users'
@@ -414,7 +415,7 @@ app.post('/api/users/:idUser/centers', function(req, resp) {
           knex('center').insert(nuevoObj)
           .then(function (row) {
             resp.status(201)
-            resp.header('Location', 'http://localhost:3000/api/centers' + row)
+            resp.header('Location', 'http://localhost:3000/api/centers/' + row)
             resp.send({
               "id": row,
               "_links": {
@@ -598,13 +599,11 @@ app.delete('/api/users/:idUser/centers/:idCenter', function(req, resp) {
 app.get('/api/users/:id/animals', function(req, resp) {
 
   const userId = parseInt(req.params.id)
-  let offset = parseInt(req.query.offset);
 
   knex.select().table('user').where('id', userId)
   .then( function(user) {
     if(user.length > 0) {
       knex.select().table('animal').where('user_id', userId)
-      .limit(3).offset((offset - 1) * 3)
       .then( function(data) {
         var array = []
 
@@ -618,10 +617,10 @@ app.get('/api/users/:id/animals', function(req, resp) {
             user_id: element.user_id,
             _links: {
               prev: {
-                 href: 'http://localhost:3000/api/users/' + userId + '/animals?offset=' + (offset - 1)
+                 href: 'http://localhost:3000/api/users/' + userId + '/animals'
               },
               next: {
-                 href: 'http://localhost:3000/api/users/' + userId + '/animals?offset=' + (offset + 1)
+                 href: 'http://localhost:3000/api/users/' + userId + '/animals'
               },
               user: {
                 href: 'http://localhost:3000/api/users/' + userId
@@ -685,7 +684,7 @@ app.get('/api/centers/:id/animals', function(req, resp) {
                  href: 'http://localhost:3000/api/centers/' + centerId + '/animals?offset=' + (offset + 1)
               },
               center: {
-                href: 'http://localhost:3000/api/centers' + centerId
+                href: 'http://localhost:3000/api/centers/' + centerId
               }
             }
           })
