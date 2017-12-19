@@ -651,17 +651,18 @@ app.get('/api/users/:id/animals', function(req, resp) {
     resp.end()
   });
 })
-
+const ANIMAL_LIMIT = 100
 app.get('/api/centers/:id/animals', function(req, resp) {
 
   const centerId = parseInt(req.params.id)
   let offset = parseInt(req.query.offset);
+  let limit = (offset) ? 3 : ANIMAL_LIMIT
 
   knex.select().table('center').where('id', centerId)
   .then( function(center) {
     if(center.length > 0) {
       knex.select().table('animal').where('center_id', centerId)
-      .limit(3).offset((offset - 1) * 3)
+      .limit(limit).offset((offset - 1) * limit)
       .then( function(data) {
         var array = []
 
